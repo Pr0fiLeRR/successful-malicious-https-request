@@ -2,7 +2,7 @@
 
 ### Reason for Implementation
 
-- I have seen incidents containing malicious HTTPS requests from many different IP addresses, this script gives us some information by correlating the IP address with the type of attack attempted from the IP, with the time stamp and the attack count.
+- I have seen incidents containing malicious HTTPS requests from many different IP addresses, this script gives us some information by correlating the IP address with the type of attack attempted from the IP (e.g., SQLi, XSS, Illegal Resource Access), with the time stamp and the attack count.
 
 <img align="left" alt="MITRE ATT&CK Logo" width="120px" src="https://attack.mitre.org/theme/images/mitre_attack_logo.png"/>
 <br/>
