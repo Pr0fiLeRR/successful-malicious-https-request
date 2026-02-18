@@ -1,0 +1,51 @@
+//################################################################################################
+//##  PLATFORM: Imperva WAF
+//##  AUTHOR: IGOR OLIVEIRA
+//##  LOCATION: Microsoft Sentinel | Logs
+//##  TITLE: KQL to detect suspicious HTTP requests
+//##  Reference: https://docs-cybersec.thalesgroup.com/bundle/cloud-application-security/page/error-codes.htm
+//################################################################################################
+ImpervaWAFCloud_CL
+    | where TimeGenerated > ago(30d)
+    | extend
+        SrcIpAddr = src_s,
+        DvcAction = act_s,
+        UrlOriginal = sourceServiceName_s,
+        QueryString = qstr_s,
+        Country = ccode_s,
+        City = cicode_s,
+        AttackType = Attack_Name_s,
+        HackingToolUsed = clapp_s,
+        DstPortNumber = spt_s,
+        DstIpAddr = sip_s,
+        UserAgent = requestClientApplication_s,
+        RequestedURL = request_s
+    | where not(AttackType has_any ("Normal", "IncapRules"))
+    | where isnotempty(AttackType)
+    | where DvcAction == "REQ_PASSED" // In case you don't see results, change the operator from == to != to see blocked HTTP requests.
+    // Stage 1: Count per IP + AttackType
+    | summarize
+        TimeStarts = min(TimeGenerated),
+        TimeEnds = max(TimeGenerated),
+        AttackTypeCount = count()
+        by SrcIpAddr, AttackType
+    // Build formatted string
+    | extend AttackTypeFormatted =
+        strcat(AttackType, " (", AttackTypeCount, ")")
+    // Stage 2: Rebuild per IP
+    | summarize
+        TimeStarts = min(TimeStarts),
+        TimeEnds = max(TimeEnds),
+        FirstSeen = min(AttackTypeCount),
+        TotalAttackCount = sum(AttackTypeCount),
+        AttackTypes = make_list(AttackTypeFormatted)
+        by SrcIpAddr
+    // Convert array to readable string
+    | extend AttackTypes = strcat_array(AttackTypes, " ; ")
+    | project
+        TimeStarts,
+        TimeEnds,
+        SrcIpAddr,
+        AttackTypes,
+        TotalAttackCount
+    | sort by TotalAttackCount desc
