@@ -1,0 +1,41 @@
+---
+title: Detect Suspicious HTTP Requests
+author: Igor Oliveira (Pr0fiLeRR)
+id: 0099a6b1-dd43-4ad5-a3cb-47bf5931d3a3
+references:
+  - https://docs-cybersec.thalesgroup.com/bundle/cloud-application-security/page/error-codes.htm
+  - https://sigmahq.io/sigma-specification/specification/sigma-rules-specification.html
+  - https://detections.ai/rules/019c6e45-2654-7072-a368-f3c7f153f9ca
+description: |
+  This rule detects HTTPS requests that should have been blocked but are not, for example:
+  Query Strings with malicious traits like 1=1, attempt to enter <script> in the URL,
+  URL containing ../ indicating Directory Traversal attempt, and so on.
+status: stable
+tags:
+  - attack.t1071.001
+date: 2026-02-17
+modified: 2026-02-18
+logsource:
+  product: Imperva
+  category: web_application_firewall
+  service: https
+detection:
+  selection_base:
+    http.request.method: 'GET'
+    dvc.action: 'REQ_PASSED'
+  selection_keywords:
+    query.string|contains|any: Malicious_QueryStrings
+  selection_sqli_plain:
+    query.string|re: '(?i)[''"]?\s*or\s+[''"]?(\d+)\s*=\s*\1'
+  selection_sqli_encoded:
+    query.string|re: '%27\s*or\s*%27(\d+)%27\s*=%20%27\1'
+  condition: selection_base and (selection_keywords or selection_sqli_plain or selection_sqli_encoded)
+fields:
+  - SrcIpAddr
+  - QueryString
+  - AttackType
+falsepositives:
+  - User asking about web development on a Discussion Forums (e.g., How do I use <script> tags in HTML?)
+  - Rich Text Editors (e.g., <iframe src="youtube.com/embed/abc">)
+level: high
+...
