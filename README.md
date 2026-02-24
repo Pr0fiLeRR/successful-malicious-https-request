@@ -20,4 +20,5 @@
 <img align="left" alt="Detections.ai logo" width="120px" src="https://detections.ai/detections-logo-navbar.svg"/>
 <br/>
 
-- [Link to this contribution](https://detections.ai/rules/019c6e45-2654-7072-a368-f3c7f153f9ca)
+- [Link to the KQL contribution](https://detections.ai/rules/019c6e45-2654-7072-a368-f3c7f153f9ca)
+- [Link to the Sigma contribution](https://detections.ai/rules/019c734c-ddea-75af-96ec-7c398a2a3c08)
